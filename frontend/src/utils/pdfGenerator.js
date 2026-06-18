@@ -8,10 +8,16 @@ export const downloadInvoiceAsPDF = (elementId, invoiceNumber = 'invoice') => {
     }
 
     const options = {
-        margin: 10,
+        margin: [8, 6, 8, 6],
         filename: `${invoiceNumber}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
+        html2canvas: {
+            scale: 2,
+            useCORS: true,
+            letterRendering: true,
+            logging: false,
+            backgroundColor: '#ffffff',
+        },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
         pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
     };
@@ -25,19 +31,28 @@ export const printInvoice = (elementId) => {
 
     const printWindow = window.open('', '_blank');
     printWindow.document.write('<html><head><title>Print Invoice</title>');
-    
-    // Copy styles
-    const styles = document.querySelectorAll('style, link[rel="stylesheet"]');
-    styles.forEach(style => {
-        printWindow.document.write(style.outerHTML);
+
+    // Extract the embedded <style> tag from the invoice preview
+    const embeddedStyles = element.querySelectorAll('style');
+    embeddedStyles.forEach(style => {
+        printWindow.document.write(`<style>${style.innerHTML}</style>`);
     });
 
     // Custom styles for printing
     printWindow.document.write(`
         <style>
-            body { padding: 20px; font-family: 'Inter', sans-serif; background: white !important; }
+            body { 
+                padding: 0; 
+                margin: 0;
+                font-family: Arial, Helvetica, sans-serif; 
+                background: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
             .no-print { display: none !important; }
-            .print-container { width: 100%; border: none; box-shadow: none; margin: 0; padding: 0; }
+            @media print {
+                body { margin: 0; padding: 0; }
+            }
         </style>
     `);
 
