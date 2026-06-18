@@ -1,4 +1,3 @@
-import { formatCurrency } from '../utils/calculations';
 import StatusBadge from './StatusBadge';
 
 const InvoicePreview = ({ invoice }) => {
@@ -37,6 +36,28 @@ const InvoicePreview = ({ invoice }) => {
                     <p className="text-sm font-bold text-slate-700 max-w-md mt-1 italic">{invoice.customerAddress || '____________________________________________________'}</p>
                     {invoice.customerPhone && <p className="text-xs font-black mt-2 text-blue-600">PH: {invoice.customerPhone}</p>}
                 </div>
+            </div>
+
+            {/* Note Section */}
+            <div className="border-2 border-black border-t-0 px-4" style={{ pageBreakInside: 'avoid' }}>
+                {/* 2-line top gap */}
+                <div className="h-5"></div>
+                <div className="flex items-baseline gap-2">
+                    <span
+                        className="text-xs shrink-0"
+                        style={{ fontWeight: 700, fontFamily: 'inherit' }}
+                    >
+                        Note:
+                    </span>
+                    <span
+                        className="flex-1 border-b border-black text-xs pb-0.5"
+                        style={{ fontWeight: 400, minWidth: 0 }}
+                    >
+                        {invoice.note || ''}
+                    </span>
+                </div>
+                {/* 2-line bottom gap */}
+                <div className="h-5"></div>
             </div>
 
             {/* Product Table Grid */}

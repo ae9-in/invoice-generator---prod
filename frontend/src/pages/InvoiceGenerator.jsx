@@ -53,7 +53,7 @@ const InvoiceGenerator = () => {
         totalTax: 0,
         totalDiscount: 0,
         grandTotal: 0,
-        notes: "Thank you for choosing Akshara Enterprises. We appreciate your business!",
+        note: '',
         docType: docType
     });
 

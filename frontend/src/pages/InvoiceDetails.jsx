@@ -32,7 +32,7 @@ const InvoiceDetails = () => {
             }
         };
         fetchInvoice();
-    }, [id]);
+    }, [id, navigate]);
 
     const handlePrint = () => {
         printInvoice('invoice-preview');
@@ -72,7 +72,7 @@ const InvoiceDetails = () => {
             <Toaster position="top-right" />
             
             <main className="max-w-7xl mx-auto px-6 pt-32 pb-24">
-                <div className="flex flex-col md:row items-center justify-between mb-12 fade-in">
+                <div className="flex flex-col md:flex-row items-center justify-between mb-12 fade-in">
                     <div className="flex items-center gap-6">
                         <button 
                             onClick={() => navigate('/saved')}
@@ -81,7 +81,7 @@ const InvoiceDetails = () => {
                             <ChevronLeft size={24} />
                         </button>
                         <div>
-                            <h1 className="text-4xl md:text-5xl font-black font-outfit text-slate-900 leading-tight block flex items-center gap-4">
+                            <h1 className="text-4xl md:text-5xl font-black font-outfit text-slate-900 leading-tight flex items-center gap-4">
                                 <Receipt className="text-blue-600" size={36} />
                                 {invoice.invoiceNumber}
                             </h1>

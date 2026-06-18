@@ -114,9 +114,9 @@ const SavedInvoices = () => {
             <Toaster position="top-right" />
             
             <main className="max-w-7xl mx-auto px-6 pt-32 pb-24">
-                <div className="flex flex-col md:row items-center justify-between mb-12 fade-in">
+                <div className="flex flex-col md:flex-row items-center justify-between mb-12 fade-in">
                     <div>
-                        <h1 className="text-4xl md:text-5xl font-black font-outfit text-slate-900 leading-tight block flex items-center gap-4">
+                        <h1 className="text-4xl md:text-5xl font-black font-outfit text-slate-900 leading-tight flex items-center gap-4">
                             <History className="text-indigo-600" size={36} />
                             {isAdmin ? 'Orders Dashboard' : 'My Orders Center'}
                         </h1>
