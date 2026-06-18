@@ -297,6 +297,19 @@ const InvoiceGenerator = () => {
                                         </div>
                                     )}
                                 </div>
+
+                                {/* Note Input */}
+                                <div className="flex items-start gap-4 border-t border-[#ecdfe2] pt-6">
+                                    <label className="min-w-[120px] pt-3 text-[10px] font-black font-outfit uppercase tracking-widest text-[#9d7e86]">Note</label>
+                                    <input
+                                        type="text"
+                                        className="flex-1 rounded-xl border border-[#ebdde0] bg-white/72 px-4 py-3 text-xs font-black font-outfit text-slate-900 focus:border-[#7E0E16] focus:outline-none focus:ring-2 focus:ring-rose-100 placeholder:text-[#c8aeb4] disabled:opacity-75"
+                                        placeholder="Enter note for the invoice..."
+                                        value={invoice.note}
+                                        disabled={orderPlaced}
+                                        onChange={(e) => handleFieldChange('note', e.target.value)}
+                                    />
+                                </div>
                         </div>
 
                         <div className="mb-2 flex items-center gap-4">
