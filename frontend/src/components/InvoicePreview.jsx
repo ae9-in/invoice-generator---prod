@@ -1,7 +1,7 @@
 import StatusBadge from './StatusBadge';
 
 const InvoicePreview = ({ invoice }) => {
-    // Fill up to 12 rows for that "Bill Book" feel
+    // Fill up to 10 rows for that "Bill Book" feel
     const displayItems = [...(invoice.items || [])];
     const effectiveGstRate = Number(
         invoice.gstRate ??
@@ -12,128 +12,497 @@ const InvoicePreview = ({ invoice }) => {
         displayItems.push({ productName: '', packetWeight: '', quantity: '', unitPrice: '', lineTotal: '' });
     }
 
+    const formatAmount = (val) => {
+        if (!val && val !== 0) return '';
+        return Number(val).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    };
+
     return (
-        <div id="invoice-preview" className="bg-white p-4 shadow-2xl min-h-[1020px] font-sans text-black relative">
-            <div className="mb-2 text-gray-400 font-black text-xs tracking-[0.5em] uppercase">{invoice.docType || 'INVOICE'}</div>
-            
-            {/* Header Boxed Section */}
-            <div className="border-2 border-black flex flex-row" style={{ pageBreakInside: 'avoid' }}>
-                <div className="flex-1 bg-white p-8 flex items-center justify-center border-r-2 border-black">
-                    <h1 className="text-4xl font-black font-outfit tracking-tight text-center">AKSHARA ENTERPRISES</h1>
+        <div
+            id="invoice-preview"
+            style={{
+                background: '#fff',
+                padding: '36px 40px 28px 40px',
+                minHeight: '1080px',
+                fontFamily: "'Arial', 'Helvetica', sans-serif",
+                color: '#000',
+                position: 'relative',
+                fontSize: '13px',
+                lineHeight: 1.45,
+            }}
+        >
+            {/* Document Type Label */}
+            <div
+                style={{
+                    letterSpacing: '0.45em',
+                    fontSize: '10px',
+                    fontWeight: 400,
+                    color: '#888',
+                    textTransform: 'uppercase',
+                    marginBottom: '14px',
+                }}
+            >
+                {invoice.docType || 'INVOICE'}
+            </div>
+
+            {/* ===== HEADER: Company Name + Address ===== */}
+            <div
+                style={{
+                    border: '2px solid #000',
+                    display: 'flex',
+                    flexDirection: 'row',
+                    marginBottom: 0,
+                }}
+            >
+                {/* Left side — Company Name */}
+                <div
+                    style={{
+                        flex: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '28px 20px',
+                        borderRight: '2px solid #000',
+                    }}
+                >
+                    <h1
+                        style={{
+                            fontSize: '30px',
+                            fontWeight: 900,
+                            letterSpacing: '0.03em',
+                            textAlign: 'center',
+                            margin: 0,
+                            lineHeight: 1.15,
+                            fontFamily: "'Arial Black', 'Arial', sans-serif",
+                        }}
+                    >
+                        AKSHARA<br />ENTERPRISES
+                    </h1>
                 </div>
-                <div className="w-[300px] bg-blue-50 p-4 text-[11px] font-bold leading-tight space-y-1">
-                    <p>BHIVE Platinum</p>
-                    <p>48, Church St, Haridevpur, Shanthala Nagar, Ashok Nagar, Bengaluru, Karnataka - 560001</p>
-                    <p>Contact: 9731105968</p>
+                {/* Right side — Address */}
+                <div
+                    style={{
+                        width: '260px',
+                        padding: '14px 16px',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        lineHeight: 1.55,
+                    }}
+                >
+                    <p style={{ margin: '0 0 2px 0' }}>BHIVE Platinum</p>
+                    <p style={{ margin: '0 0 2px 0' }}>48, Church St, Haridevpur, Shanthala Nagar,</p>
+                    <p style={{ margin: '0 0 2px 0' }}>Ashok Nagar, Bengaluru, Karnataka- 560001</p>
+                    <p style={{ margin: '6px 0 0 0' }}>Contact: 9731185960</p>
                 </div>
             </div>
 
-            {/* Recipient Section */}
-            <div className="border-2 border-black border-t-0 p-4 min-h-[100px]" style={{ pageBreakInside: 'avoid' }}>
-                <div className="text-[12px] font-bold mb-1">To:</div>
-                <div className="pl-4">
-                    <p className="text-xl font-black uppercase">{invoice.customerName || '_________________________'}</p>
-                    <p className="text-sm font-bold text-slate-700 max-w-md mt-1 italic">{invoice.customerAddress || '____________________________________________________'}</p>
-                    {invoice.customerPhone && <p className="text-xs font-black mt-2 text-blue-600">PH: {invoice.customerPhone}</p>}
+            {/* ===== TO: Recipient Section ===== */}
+            <div
+                style={{
+                    border: '2px solid #000',
+                    borderTop: 'none',
+                    padding: '16px 20px',
+                    minHeight: '90px',
+                }}
+            >
+                <div style={{ fontSize: '12px', fontWeight: 700, marginBottom: '6px' }}>To:</div>
+                <div style={{ paddingLeft: '20px' }}>
+                    <p
+                        style={{
+                            fontSize: '17px',
+                            fontWeight: 900,
+                            textTransform: 'uppercase',
+                            margin: '0 0 4px 0',
+                        }}
+                    >
+                        {invoice.customerName || '_________________________'}
+                    </p>
+                    <p
+                        style={{
+                            fontSize: '12px',
+                            fontWeight: 500,
+                            color: '#333',
+                            maxWidth: '420px',
+                            margin: '0 0 4px 0',
+                            fontStyle: 'italic',
+                        }}
+                    >
+                        {invoice.customerAddress || '____________________________________________________'}
+                    </p>
+                    {invoice.customerPhone && (
+                        <p
+                            style={{
+                                fontSize: '12px',
+                                fontWeight: 800,
+                                margin: '6px 0 0 0',
+                            }}
+                        >
+                            PH: {invoice.customerPhone}
+                        </p>
+                    )}
                 </div>
             </div>
 
-            {/* Note Section */}
-            <div className="border-2 border-black border-t-0 px-4" style={{ pageBreakInside: 'avoid' }}>
-                {/* 2-line top gap */}
-                <div className="h-5"></div>
-                <div className="flex items-baseline gap-2">
+            {/* ===== NOTE Section ===== */}
+            <div
+                style={{
+                    border: '2px solid #000',
+                    borderTop: 'none',
+                    padding: '14px 20px',
+                }}
+            >
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
                     <span
-                        className="text-xs shrink-0"
-                        style={{ fontWeight: 700, fontFamily: 'inherit' }}
+                        style={{
+                            fontSize: '11px',
+                            fontWeight: 700,
+                            flexShrink: 0,
+                        }}
                     >
                         Note:
                     </span>
                     <span
-                        className="flex-1 border-b border-black text-xs pb-0.5"
-                        style={{ fontWeight: 400, minWidth: 0 }}
+                        style={{
+                            flex: 1,
+                            borderBottom: '1px solid #000',
+                            fontSize: '11px',
+                            fontWeight: 400,
+                            paddingBottom: '2px',
+                        }}
                     >
                         {invoice.note || ''}
                     </span>
                 </div>
-                {/* 2-line bottom gap */}
-                <div className="h-5"></div>
             </div>
 
-            {/* Product Table Grid */}
-            <div className="border-2 border-black border-t-0" style={{ pageBreakInside: 'avoid' }}>
-                <table className="w-full border-collapse">
+            {/* ===== Product Table ===== */}
+            <div
+                style={{
+                    border: '2px solid #000',
+                    borderTop: 'none',
+                }}
+            >
+                <table
+                    style={{
+                        width: '100%',
+                        borderCollapse: 'collapse',
+                    }}
+                >
                     <thead>
-                        <tr className="border-b-2 border-black text-[12px] font-black uppercase tracking-wider text-center">
-                            <th className="border-r-2 border-black py-3 w-[8%] italic">SL.No</th>
-                            <th className="border-r-2 border-black py-3 w-[45%] text-left px-4">Product description</th>
-                            <th className="border-r-2 border-black py-3 w-[15%]">Packet weight</th>
-                            <th className="border-r-2 border-black py-3 w-[8%]">Qty</th>
-                            <th className="border-r-2 border-black py-3 w-[12%]">Rate</th>
-                            <th className="py-3 w-[12%]">Amount</th>
+                        <tr
+                            style={{
+                                borderBottom: '2px solid #000',
+                                fontSize: '11px',
+                                fontWeight: 900,
+                                textTransform: 'uppercase',
+                                textAlign: 'center',
+                            }}
+                        >
+                            <th
+                                style={{
+                                    borderRight: '2px solid #000',
+                                    padding: '10px 4px',
+                                    width: '7%',
+                                    fontStyle: 'italic',
+                                }}
+                            >
+                                SL.NO
+                            </th>
+                            <th
+                                style={{
+                                    borderRight: '2px solid #000',
+                                    padding: '10px 12px',
+                                    width: '42%',
+                                    textAlign: 'left',
+                                }}
+                            >
+                                PRODUCT DESCRIPTION
+                            </th>
+                            <th
+                                style={{
+                                    borderRight: '2px solid #000',
+                                    padding: '10px 4px',
+                                    width: '14%',
+                                    lineHeight: 1.2,
+                                }}
+                            >
+                                PACKET<br />WEIGHT
+                            </th>
+                            <th
+                                style={{
+                                    borderRight: '2px solid #000',
+                                    padding: '10px 4px',
+                                    width: '8%',
+                                }}
+                            >
+                                QTY
+                            </th>
+                            <th
+                                style={{
+                                    borderRight: '2px solid #000',
+                                    padding: '10px 4px',
+                                    width: '12%',
+                                }}
+                            >
+                                RATE
+                            </th>
+                            <th
+                                style={{
+                                    padding: '10px 4px',
+                                    width: '14%',
+                                }}
+                            >
+                                AMOUNT
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
                         {displayItems.map((item, idx) => (
-                            <tr key={idx} className="border-b border-black/10 h-10 text-[13px] font-bold">
-                                <td className="border-r-2 border-black text-center text-slate-400">
+                            <tr
+                                key={idx}
+                                style={{
+                                    borderBottom: '1px solid #ddd',
+                                    height: '38px',
+                                    fontSize: '13px',
+                                    fontWeight: 600,
+                                }}
+                            >
+                                <td
+                                    style={{
+                                        borderRight: '2px solid #000',
+                                        textAlign: 'center',
+                                        color: '#555',
+                                        padding: '4px',
+                                    }}
+                                >
                                     {item.productName ? idx + 1 : ''}
                                 </td>
-                                <td className="border-r-2 border-black px-4">
-                                    <div className="font-bold">{item.productName}</div>
-                                    {item.brand && <div className="text-[10px] text-blue-600 font-black uppercase tracking-widest">{item.brand}</div>}
+                                <td
+                                    style={{
+                                        borderRight: '2px solid #000',
+                                        padding: '6px 12px',
+                                    }}
+                                >
+                                    <div style={{ fontWeight: 700 }}>{item.productName}</div>
+                                    {item.brand && (
+                                        <div
+                                            style={{
+                                                fontSize: '10px',
+                                                fontWeight: 900,
+                                                textTransform: 'uppercase',
+                                                letterSpacing: '0.12em',
+                                                color: '#444',
+                                                marginTop: '1px',
+                                            }}
+                                        >
+                                            {item.brand}
+                                        </div>
+                                    )}
                                 </td>
-                                <td className="border-r-2 border-black text-center">{item.packetWeight}</td>
-                                <td className="border-r-2 border-black text-center">{item.quantity}</td>
-                                <td className="border-r-2 border-black text-center">
-                                    {item.unitPrice ? item.unitPrice.toLocaleString() : ''}
+                                <td
+                                    style={{
+                                        borderRight: '2px solid #000',
+                                        textAlign: 'center',
+                                        padding: '4px',
+                                    }}
+                                >
+                                    {item.packetWeight}
                                 </td>
-                                <td className="text-right px-4">
-                                    {item.lineTotal ? item.lineTotal.toLocaleString() : ''}
+                                <td
+                                    style={{
+                                        borderRight: '2px solid #000',
+                                        textAlign: 'center',
+                                        padding: '4px',
+                                    }}
+                                >
+                                    {item.quantity}
+                                </td>
+                                <td
+                                    style={{
+                                        borderRight: '2px solid #000',
+                                        textAlign: 'center',
+                                        padding: '4px',
+                                    }}
+                                >
+                                    {item.unitPrice ? item.unitPrice.toLocaleString('en-IN') : ''}
+                                </td>
+                                <td
+                                    style={{
+                                        textAlign: 'right',
+                                        padding: '4px 12px',
+                                    }}
+                                >
+                                    {item.lineTotal ? formatAmount(item.lineTotal) : ''}
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                     <tfoot>
-                        <tr className="border-t-2 border-black font-bold text-[11px]">
-                            <td colSpan="5" className="border-r-2 border-black py-1 text-right px-6">SUBTOTAL</td>
-                            <td className="text-right px-4 py-1">
-                                {invoice.subtotal ? invoice.subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 }) : '0.00'}
+                        {/* SUBTOTAL */}
+                        <tr style={{ borderTop: '2px solid #000' }}>
+                            <td
+                                colSpan="5"
+                                style={{
+                                    borderRight: '2px solid #000',
+                                    padding: '8px 16px',
+                                    textAlign: 'right',
+                                    fontSize: '12px',
+                                    fontWeight: 700,
+                                }}
+                            >
+                                SUBTOTAL
+                            </td>
+                            <td
+                                style={{
+                                    textAlign: 'right',
+                                    padding: '8px 12px',
+                                    fontSize: '12px',
+                                    fontWeight: 700,
+                                }}
+                            >
+                                {formatAmount(invoice.subtotal)}
                             </td>
                         </tr>
-                        <tr className="border-t border-black/10 font-bold text-[11px]">
-                            <td colSpan="5" className="border-r-2 border-black py-1 text-right px-6 italic">
+                        {/* TOTAL GST */}
+                        <tr style={{ borderTop: '1px solid #bbb' }}>
+                            <td
+                                colSpan="5"
+                                style={{
+                                    borderRight: '2px solid #000',
+                                    padding: '8px 16px',
+                                    textAlign: 'right',
+                                    fontSize: '12px',
+                                    fontWeight: 700,
+                                }}
+                            >
                                 TOTAL GST {effectiveGstRate ? `(${effectiveGstRate}%)` : ''}
                             </td>
-                            <td className="text-right px-4 py-1">
-                                {invoice.totalTax ? invoice.totalTax.toLocaleString('en-IN', { minimumFractionDigits: 2 }) : '0.00'}
+                            <td
+                                style={{
+                                    textAlign: 'right',
+                                    padding: '8px 12px',
+                                    fontSize: '12px',
+                                    fontWeight: 700,
+                                }}
+                            >
+                                {formatAmount(invoice.totalTax)}
                             </td>
                         </tr>
-                        <tr className="border-t-2 border-black font-black text-sm bg-slate-50">
-                            <td colSpan="5" className="border-r-2 border-black py-3 text-right px-6">GRAND TOTAL</td>
-                            <td className="text-right px-4 py-3 text-lg underline decoration-double underline-offset-4">
-                                {invoice.grandTotal ? invoice.grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 }) : '0.00'}
+                        {/* GRAND TOTAL */}
+                        <tr style={{ borderTop: '2px solid #000' }}>
+                            <td
+                                colSpan="5"
+                                style={{
+                                    borderRight: '2px solid #000',
+                                    padding: '10px 16px',
+                                    textAlign: 'right',
+                                    fontSize: '14px',
+                                    fontWeight: 900,
+                                }}
+                            >
+                                GRAND TOTAL
+                            </td>
+                            <td
+                                style={{
+                                    textAlign: 'right',
+                                    padding: '10px 12px',
+                                }}
+                            >
+                                <span
+                                    style={{
+                                        display: 'inline-block',
+                                        border: '2px solid #000',
+                                        padding: '4px 14px',
+                                        fontSize: '15px',
+                                        fontWeight: 900,
+                                        letterSpacing: '0.02em',
+                                    }}
+                                >
+                                    {formatAmount(invoice.grandTotal)}
+                                </span>
                             </td>
                         </tr>
                     </tfoot>
                 </table>
             </div>
 
-            {/* Signature Footer */}
-            <div className="border-2 border-black border-t-0 flex justify-between p-4 h-24" style={{ pageBreakInside: 'avoid' }}>
-                <div className="flex flex-col justify-end">
-                    <div className="w-40 border-t border-black text-[10px] text-center font-bold">Received By</div>
+            {/* ===== Signature Footer ===== */}
+            <div
+                style={{
+                    border: '2px solid #000',
+                    borderTop: 'none',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    padding: '16px 20px',
+                    height: '90px',
+                    alignItems: 'flex-end',
+                }}
+            >
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+                    <div
+                        style={{
+                            width: '160px',
+                            borderTop: '1px solid #000',
+                            fontSize: '10px',
+                            textAlign: 'center',
+                            fontWeight: 600,
+                            paddingTop: '4px',
+                            fontStyle: 'italic',
+                        }}
+                    >
+                        Received By
+                    </div>
                 </div>
-                <div className="flex flex-col justify-end">
-                    <div className="w-40 border-t border-black text-[10px] text-center font-bold">Signature</div>
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+                    <div
+                        style={{
+                            width: '160px',
+                            borderTop: '1px solid #000',
+                            fontSize: '10px',
+                            textAlign: 'center',
+                            fontWeight: 600,
+                            paddingTop: '4px',
+                            fontStyle: 'italic',
+                        }}
+                    >
+                        Signature
+                    </div>
                 </div>
             </div>
 
-            {/* Delivery Challan Status Section - Positioned at bottom */}
+            {/* Delivery Challan Status Section - Only on Invoices */}
             {invoice.challanStatus && (
-                <div className="absolute bottom-10 left-4 right-4 border border-blue-100 bg-blue-50/50 p-4 rounded-xl" style={{ pageBreakInside: 'avoid' }}>
-                    <p className="text-[10px] font-black font-outfit text-blue-400 uppercase tracking-[0.2em] mb-1">Delivery Challan Status</p>
-                    <p className="text-sm font-black text-blue-700 tracking-tight uppercase leading-tight">
+                <div
+                    style={{
+                        marginTop: '16px',
+                        border: '1px solid #d0d8e8',
+                        backgroundColor: '#f0f4ff',
+                        padding: '14px 16px',
+                        borderRadius: '10px',
+                    }}
+                >
+                    <p
+                        style={{
+                            fontSize: '10px',
+                            fontWeight: 900,
+                            color: '#6b82b0',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.2em',
+                            marginBottom: '4px',
+                        }}
+                    >
+                        Delivery Challan Status
+                    </p>
+                    <p
+                        style={{
+                            fontSize: '13px',
+                            fontWeight: 900,
+                            color: '#2c4a82',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.02em',
+                            margin: 0,
+                        }}
+                    >
                         {invoice.challanStatus}
                     </p>
                 </div>
