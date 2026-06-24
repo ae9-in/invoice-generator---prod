@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { toast, Toaster } from 'react-hot-toast';
-import { Pencil, FileCheck, CheckCircle, Info, Receipt, HelpCircle } from 'lucide-react';
+import { Pencil, FileCheck, CheckCircle, Info, Receipt, HelpCircle, Download } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ProductTable from '../components/ProductTable';
@@ -16,17 +16,21 @@ import { normalizeProductWeight } from '../utils/productFields';
 const InvoiceGenerator = () => {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
-    const docType = queryParams.get('type') === 'quotation' ? 'QUOTATION' : 'INVOICE';
+    const typeParam = queryParams.get('type');
+    const docType = typeParam === 'quotation' ? 'QUOTATION' : 'INVOICE';
+    const isAromaDew = typeParam === 'aroma_dew';
     const isQuotation = docType === 'QUOTATION';
-    const docLabel = isQuotation ? 'Quotation' : 'Invoice';
+    const docLabel = isAromaDew ? 'Aroma Dew Invoice' : (isQuotation ? 'Quotation' : 'Invoice');
     const HeadingIcon = isQuotation ? FileCheck : Pencil;
-    const introLabel = isQuotation ? 'Quotation Workspace' : 'Invoice Workspace';
-    const introText = isQuotation
-        ? 'Prepare a polished quotation with pricing, quantities, and share-ready totals.'
-        : 'Prepare a polished invoice with customer details, products, and ready-to-send totals.';
-    const primaryActionLabel = isQuotation ? 'Generate Quotation' : 'Generate Invoice';
-    const downloadActionLabel = isQuotation ? 'Download Official Quotation' : 'Download Official Invoice';
-    const resetActionLabel = isQuotation ? 'Create Another Quotation' : 'Create Another Invoice';
+    const introLabel = isAromaDew ? 'Aroma Dew Workspace' : (isQuotation ? 'Quotation Workspace' : 'Invoice Workspace');
+    const introText = isAromaDew
+        ? 'Prepare a polished Aroma Dew soap invoice with customer details, products, and ready-to-send totals.'
+        : isQuotation
+            ? 'Prepare a polished quotation with pricing, quantities, and share-ready totals.'
+            : 'Prepare a polished invoice with customer details, products, and ready-to-send totals.';
+    const primaryActionLabel = isAromaDew ? 'Generate Aroma Dew Invoice' : (isQuotation ? 'Generate Quotation' : 'Generate Invoice');
+    const downloadActionLabel = isAromaDew ? 'Download Aroma Dew Invoice' : (isQuotation ? 'Download Official Quotation' : 'Download Official Invoice');
+    const resetActionLabel = isAromaDew ? 'Create Another Aroma Dew Invoice' : (isQuotation ? 'Create Another Quotation' : 'Create Another Invoice');
     
     const [isSaving, setIsSaving] = useState(false);
     const [orderPlaced, setOrderPlaced] = useState(false);
@@ -34,7 +38,7 @@ const InvoiceGenerator = () => {
     // Initial State
     const [masterProducts, setMasterProducts] = useState([]);
     const [invoice, setInvoice] = useState({
-        businessName: 'Akshara Enterprises',
+        businessName: isAromaDew ? 'Aroma Dew' : 'Akshara Enterprises',
         businessAddress: '123 Enterprise Way, Industrial Park, Bangalore, KA, India',
         businessEmail: 'contact@akshara.in',
         businessPhone: '+91 80 4567 8901',
@@ -56,6 +60,15 @@ const InvoiceGenerator = () => {
         note: '',
         docType: docType
     });
+
+    // Update docType and businessName when query parameters change
+    useEffect(() => {
+        setInvoice(prev => ({
+            ...prev,
+            docType: docType,
+            businessName: isAromaDew ? 'Aroma Dew' : 'Akshara Enterprises'
+        }));
+    }, [docType, isAromaDew]);
 
     // Load master products on mount
     useEffect(() => {
@@ -200,7 +213,20 @@ const InvoiceGenerator = () => {
     };
 
     const handleDownloadPDF = () => {
-        downloadInvoiceAsPDF('invoice-preview', invoice.invoiceNumber);
+        const { isValid, errors } = validateInvoice(invoice);
+        
+        if (!isValid) {
+            toast.error(getInvoiceValidationMessage(errors), {
+                icon: <Info className="text-rose-500" />,
+                style: { borderRadius: '15px', padding: '16px', background: '#fff', color: '#0f172a' }
+            });
+            return;
+        }
+
+        const filename = invoice.invoiceNumber && invoice.invoiceNumber !== 'AUTO-GENERATING...'
+            ? invoice.invoiceNumber
+            : (isAromaDew ? 'aroma-dew-invoice' : (isQuotation ? 'quotation' : 'invoice'));
+        downloadInvoiceAsPDF('invoice-preview', filename);
     };
 
     return (
@@ -373,36 +399,21 @@ const InvoiceGenerator = () => {
                              </div>
 
                              <div className="flex flex-col items-center gap-6 w-full">
-                             {!orderPlaced ? (
-                                 <button 
-                                     onClick={handlePlaceOrder}
-                                     disabled={isSaving}
-                                     className={`btn rounded-2xl bg-[#7E0E16] px-20 py-5 text-lg text-white shadow-[0_24px_44px_-24px_rgba(63,4,11,0.95)] transition-all hover:scale-105 hover:bg-[#691018] hover:shadow-[0_28px_50px_-24px_rgba(63,4,11,0.98)] ${isSaving ? 'cursor-not-allowed opacity-70' : ''}`}
-                                 >
-                                     {isSaving ? (
-                                         <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                                     ) : (
-                                         <CheckCircle size={24} />
-                                     )}
-                                     {primaryActionLabel}
-                                 </button>
-                             ) : (
                                  <div className="flex flex-col md:flex-row items-center gap-4">
                                      <button 
                                          onClick={handleDownloadPDF}
-                                         className="btn rounded-2xl bg-[#7E0E16] px-12 py-5 text-lg text-white shadow-[0_24px_44px_-24px_rgba(63,4,11,0.95)] transition-all hover:scale-105 hover:bg-[#691018]"
+                                         className="btn rounded-2xl bg-[#7E0E16] px-20 py-5 text-lg text-white shadow-[0_24px_44px_-24px_rgba(63,4,11,0.95)] transition-all hover:scale-105 hover:bg-[#691018] hover:shadow-[0_28px_50px_-24px_rgba(63,4,11,0.98)]"
                                      >
-                                         <Receipt size={24} />
+                                         <Download size={24} />
                                          {downloadActionLabel}
                                      </button>
                                      <button 
                                          onClick={() => window.location.reload()}
-                                         className="btn rounded-2xl border border-white/35 bg-white/85 px-10 py-5 font-bold text-slate-700 shadow-[0_18px_36px_-28px_rgba(24,2,6,0.9)] transition-all hover:bg-white"
+                                         className="btn rounded-2xl border border-white/35 bg-white/85 px-10 py-5 font-bold text-slate-700 shadow-[0_18px_36px_-28px_rgba(24,2,6,0.9)] transition-all hover:bg-white hover:scale-105"
                                      >
                                          {resetActionLabel}
                                      </button>
                                  </div>
-                             )}
                              </div>
                         </div>
 

@@ -6,6 +6,7 @@ import banner2 from '../assets/banner-2.jpg';
 import banner3 from '../assets/banner-3.jpg';
 import invoiceCardPreview from '../assets/invoice-card-preview.svg';
 import quotationCardPreview from '../assets/quotation-card-preview.svg';
+import aromaDewBanner from '../assets/aroma-dew-banner.jpg';
 
 const productsPreviewImages = [banner1, banner2, banner3];
 
@@ -90,7 +91,7 @@ const ActionCard = ({ icon: Icon, title, description, to, color, imageSrc, image
 const QuickActions = () => {
     return (
         <section className="max-w-7xl mx-auto px-6 -mt-10 mb-24 relative z-20">
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 <ActionCard 
                     title="PRODUCTS"
                     description="Manage your product inventory, set prices, and organize your catalog."
@@ -106,6 +107,14 @@ const QuickActions = () => {
                     color="blue"
                     imageSrc={invoiceCardPreview}
                     imageAlt="Red invoice banner preview"
+                />
+                <ActionCard 
+                    title="Aroma Dew Soap Invoice"
+                    description="Generate professional invoices specifically for Aroma Dew soap products."
+                    to="/generator?type=aroma_dew"
+                    color="blue"
+                    imageSrc={aromaDewBanner}
+                    imageAlt="Aroma Dew soap invoice banner preview"
                 />
                 <ActionCard 
                     title="Quotation"

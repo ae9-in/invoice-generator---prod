@@ -292,7 +292,11 @@ const InvoicePreview = ({ invoice }) => {
                     {/* ROW 1: Header — Company Name + Address */}
                     <tr>
                         <td className="inv-header-left" colSpan="1">
-                            <h1>AKSHARA<br/>ENTERPRISES</h1>
+                            {invoice.businessName === 'Aroma Dew' ? (
+                                <h1>AROMA DEW</h1>
+                            ) : (
+                                <h1>AKSHARA<br/>ENTERPRISES</h1>
+                            )}
                         </td>
                         <td className="inv-header-right" colSpan="1">
                             <p>BHIVE Platinum</p>
