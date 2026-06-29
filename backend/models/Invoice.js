@@ -6,6 +6,7 @@ const itemSchema = new mongoose.Schema({
     packetWeight: { type: String, required: true, trim: true },
     description: { type: String },
     quantity: { type: Number, required: true, min: 1 },
+    mrp: { type: Number, default: 0 },
     unitPrice: { type: Number, required: true, min: 0.01 },
     tax: { type: Number, default: 0 },
     discount: { type: Number, default: 0 },

@@ -11,6 +11,10 @@ const productSchema = new mongoose.Schema({
         required: true,
         default: 0
     },
+    mrp: {
+        type: Number,
+        default: 0
+    },
     category: {
         type: String,
         trim: true

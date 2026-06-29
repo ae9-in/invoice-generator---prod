@@ -158,8 +158,11 @@ const InvoicePreview = ({ invoice }) => {
                 .inv-products-table thead th.inv-th-qty {
                     width: 8%;
                 }
+                .inv-products-table thead th.inv-th-mrp {
+                    width: 10%;
+                }
                 .inv-products-table thead th.inv-th-rate {
-                    width: 12%;
+                    width: 11%;
                 }
                 .inv-products-table thead th.inv-th-amount {
                     width: 14%;
@@ -352,6 +355,7 @@ const InvoicePreview = ({ invoice }) => {
                                         <th className="inv-th-product">PRODUCT DESCRIPTION</th>
                                         <th className="inv-th-weight">PACKET<br/>WEIGHT</th>
                                         <th className="inv-th-qty">QTY</th>
+                                        <th className="inv-th-mrp">MRP</th>
                                         <th className="inv-th-rate">RATE</th>
                                         <th className="inv-th-amount">AMOUNT</th>
                                     </tr>
@@ -371,6 +375,9 @@ const InvoicePreview = ({ invoice }) => {
                                             <td>{item.packetWeight}</td>
                                             <td>{item.quantity}</td>
                                             <td>
+                                                {item.productName ? (item.mrp ? Number(item.mrp).toLocaleString('en-IN') : '0') : ''}
+                                            </td>
+                                            <td>
                                                 {item.unitPrice ? Number(item.unitPrice).toLocaleString('en-IN') : ''}
                                             </td>
                                             <td className="inv-td-amount">
@@ -382,7 +389,7 @@ const InvoicePreview = ({ invoice }) => {
                                 <tfoot>
                                     {/* SUBTOTAL */}
                                     <tr className="inv-subtotal-row">
-                                        <td colSpan="5" style={{ textAlign: 'right', paddingRight: '16px' }}>
+                                        <td colSpan="6" style={{ textAlign: 'right', paddingRight: '16px' }}>
                                             SUBTOTAL
                                         </td>
                                         <td style={{ textAlign: 'right' }}>
@@ -391,7 +398,7 @@ const InvoicePreview = ({ invoice }) => {
                                     </tr>
                                     {/* TOTAL GST */}
                                     <tr className="inv-gst-row">
-                                        <td colSpan="5" style={{ textAlign: 'right', paddingRight: '16px' }}>
+                                        <td colSpan="6" style={{ textAlign: 'right', paddingRight: '16px' }}>
                                             TOTAL GST {effectiveGstRate ? `(${effectiveGstRate}%)` : ''}
                                         </td>
                                         <td style={{ textAlign: 'right' }}>
@@ -400,7 +407,7 @@ const InvoicePreview = ({ invoice }) => {
                                     </tr>
                                     {/* GRAND TOTAL */}
                                     <tr className="inv-grand-row">
-                                        <td colSpan="5" style={{ textAlign: 'right', paddingRight: '16px' }} className="inv-grand-label">
+                                        <td colSpan="6" style={{ textAlign: 'right', paddingRight: '16px' }} className="inv-grand-label">
                                             GRAND TOTAL
                                         </td>
                                         <td style={{ textAlign: 'right' }}>

@@ -3,7 +3,7 @@ import { Trash2, Plus, Info, ChevronDown, Package } from 'lucide-react';
 import { calculateLineTotal } from '../utils/calculations';
 import { getPacketWeightValue } from '../utils/productFields';
 
-const ProductTable = ({ items, masterProducts = [], gstRate = 0, onUpdate, onAdd, onRemove, disabled = false }) => {
+const ProductTable = ({ items, masterProducts = [], gstRate = 0, onUpdate, onAdd, onRemove, disabled = false, onCreateProduct }) => {
     const [openPicker, setOpenPicker] = useState(null); // Track which row index has picker open
     const pickerRefs = useRef({});
 
@@ -23,9 +23,36 @@ const ProductTable = ({ items, masterProducts = [], gstRate = 0, onUpdate, onAdd
         onUpdate(index, 'multi', {
             productName: product.name,
             unitPrice: product.price,
+            mrp: product.mrp || 0,
             brand: product.brand,
             packetWeight: getPacketWeightValue(product)
         });
+        setOpenPicker(null);
+    };
+
+    const handleAddNewProduct = async (index, name) => {
+        if (!name || !name.trim()) return;
+        const item = items[index];
+        const productData = {
+            name: name.trim(),
+            price: Number(item.unitPrice) || 0,
+            mrp: Number(item.mrp) || 0,
+            packetWeight: item.packetWeight || '',
+            brand: item.brand || '',
+            description: ''
+        };
+        if (onCreateProduct) {
+            const created = await onCreateProduct(productData);
+            if (created) {
+                onUpdate(index, 'multi', {
+                    productName: created.name,
+                    unitPrice: created.price,
+                    mrp: created.mrp || 0,
+                    brand: created.brand,
+                    packetWeight: getPacketWeightValue(created)
+                });
+            }
+        }
         setOpenPicker(null);
     };
 
@@ -56,11 +83,12 @@ const ProductTable = ({ items, masterProducts = [], gstRate = 0, onUpdate, onAdd
                 <table className="w-full text-left border-collapse">
                     <thead>
                         <tr className="border-b border-[#efe2e4] bg-[rgba(255,248,248,0.78)] text-[10px] font-black uppercase tracking-[0.15em] text-[#7e6770] font-outfit">
-                            <th className="px-8 py-5 w-[34%] text-left">Product Name</th>
-                            <th className="px-4 py-5 w-[16%] text-center">Weight</th>
-                            <th className="px-4 py-5 w-[10%] text-center">Qty</th>
-                            <th className="px-6 py-5 w-[16%] text-center">Rate</th>
-                            <th className="px-8 py-5 w-[20%] text-right font-black">Total</th>
+                            <th className="px-8 py-5 w-[32%] text-left">Product Name</th>
+                            <th className="px-4 py-5 w-[14%] text-center">Weight</th>
+                            <th className="px-4 py-5 w-[8%] text-center">Qty</th>
+                            <th className="px-4 py-5 w-[12%] text-center">MRP</th>
+                            <th className="px-4 py-5 w-[12%] text-center">Rate</th>
+                            <th className="px-8 py-5 w-[18%] text-right font-black">Total</th>
                             <th className="px-4 py-5 w-[60px]"></th>
                         </tr>
                     </thead>
@@ -128,6 +156,25 @@ const ProductTable = ({ items, masterProducts = [], gstRate = 0, onUpdate, onAdd
                                                      <p className="text-[10px] font-black uppercase tracking-widest text-[#9d7e86]">Master Catalog List</p>
                                                 </div>
                                                 <div className="max-h-[250px] overflow-y-auto custom-scrollbar">
+                                                    {/* Add to Master Catalog Option */}
+                                                    {item.productName.trim() && !masterProducts.some(p => p.name.toLowerCase() === item.productName.trim().toLowerCase()) && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleAddNewProduct(index, item.productName)}
+                                                            className="group/item flex w-full items-center justify-between px-5 py-3 text-left border-b border-[#f1e5e7] bg-emerald-50/40 hover:bg-emerald-50 transition-colors duration-200"
+                                                        >
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 group-hover/item:bg-emerald-500 group-hover/item:text-white transition-colors duration-200">
+                                                                    <Plus size={14} />
+                                                                </div>
+                                                                <div>
+                                                                    <p className="font-bold text-emerald-700 text-sm">Add "{item.productName.trim()}" to Master Catalog</p>
+                                                                    <p className="text-[10px] text-emerald-600/80 font-semibold uppercase tracking-wider">Creates item with current rate & weight</p>
+                                                                </div>
+                                                            </div>
+                                                        </button>
+                                                    )}
+
                                                     {(masterProducts.filter(p => p.name.toLowerCase().includes(item.productName.toLowerCase())).length > 0) ? (
                                                         masterProducts
                                                             .filter(p => p.name.toLowerCase().includes(item.productName.toLowerCase()))
@@ -184,7 +231,16 @@ const ProductTable = ({ items, masterProducts = [], gstRate = 0, onUpdate, onAdd
                                             onChange={(e) => onUpdate(index, 'quantity', e.target.value)}
                                         />
                                     </td>
-                                    <td className="px-6 py-5">
+                                    <td className="px-4 py-5 text-center">
+                                        <input 
+                                            type="number" 
+                                            className="h-10 w-full rounded-xl border border-[#ebdde0] bg-white/72 px-3 text-center font-bold text-slate-700 shadow-none focus:border-[#7E0E16] focus:outline-none focus:ring-2 focus:ring-rose-100 disabled:opacity-75"
+                                            value={item.mrp}
+                                            disabled={disabled}
+                                            onChange={(e) => onUpdate(index, 'mrp', e.target.value)}
+                                        />
+                                    </td>
+                                    <td className="px-4 py-5 text-center">
                                         <input 
                                             type="number" 
                                             className="h-10 w-full rounded-xl border border-[#ebdde0] bg-white/72 px-3 text-center font-bold text-slate-700 shadow-none focus:border-[#7E0E16] focus:outline-none focus:ring-2 focus:ring-rose-100 disabled:opacity-75"

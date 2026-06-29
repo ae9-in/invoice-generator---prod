@@ -37,29 +37,49 @@ const InvoiceGenerator = () => {
     
     // Initial State
     const [masterProducts, setMasterProducts] = useState([]);
-    const [invoice, setInvoice] = useState({
-        businessName: isAromaDew ? 'Aroma Dew' : 'Akshara Enterprises',
-        businessAddress: '123 Enterprise Way, Industrial Park, Bangalore, KA, India',
-        businessEmail: 'contact@akshara.in',
-        businessPhone: '+91 80 4567 8901',
-        customerName: '',
-        customerAddress: '',
-        customerEmail: '',
-        customerPhone: '',
-        invoiceNumber: 'AUTO-GENERATING...',
-        invoiceDate: new Date().toISOString().split('T')[0],
-        dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        status: 'Pending',
-        challanStatus: '',
-        gstRate: 0,
-        items: [],
-        subtotal: 0,
-        totalTax: 0,
-        totalDiscount: 0,
-        grandTotal: 0,
-        note: '',
-        docType: docType
+    const [invoice, setInvoice] = useState(() => {
+        const saved = localStorage.getItem('pending_invoice');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                return {
+                    ...parsed,
+                    docType: docType,
+                    businessName: isAromaDew ? 'Aroma Dew' : 'Akshara Enterprises'
+                };
+            } catch (e) {
+                console.error("Error parsing saved invoice", e);
+            }
+        }
+        return {
+            businessName: isAromaDew ? 'Aroma Dew' : 'Akshara Enterprises',
+            businessAddress: '123 Enterprise Way, Industrial Park, Bangalore, KA, India',
+            businessEmail: 'contact@akshara.in',
+            businessPhone: '+91 80 4567 8901',
+            customerName: '',
+            customerAddress: '',
+            customerEmail: '',
+            customerPhone: '',
+            invoiceNumber: 'AUTO-GENERATING...',
+            invoiceDate: new Date().toISOString().split('T')[0],
+            dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            status: 'Pending',
+            challanStatus: '',
+            gstRate: 0,
+            items: [],
+            subtotal: 0,
+            totalTax: 0,
+            totalDiscount: 0,
+            grandTotal: 0,
+            note: '',
+            docType: docType
+        };
     });
+
+    // Persist invoice state to localStorage
+    useEffect(() => {
+        localStorage.setItem('pending_invoice', JSON.stringify(invoice));
+    }, [invoice]);
 
     // Update docType and businessName when query parameters change
     useEffect(() => {
@@ -117,6 +137,7 @@ const InvoiceGenerator = () => {
             description: '',
             packetWeight: '',
             quantity: 1,
+            mrp: 0,
             unitPrice: 0,
             tax: invoice.gstRate || 0,
             discount: 0,
@@ -130,7 +151,7 @@ const InvoiceGenerator = () => {
         
         // Handle field updates with proper numeric conversion
         let updatedValue = value;
-        if (['unitPrice', 'discount', 'quantity'].includes(field)) {
+        if (['unitPrice', 'discount', 'quantity', 'mrp'].includes(field)) {
             updatedValue = Number(value) || 0;
         }
 
@@ -165,6 +186,63 @@ const InvoiceGenerator = () => {
     const handleRemoveItem = (index) => {
         const newItems = invoice.items.filter((_, i) => i !== index);
         setInvoice(prev => ({ ...prev, items: newItems }));
+    };
+
+    const handleCreateMasterProduct = async (productData) => {
+        try {
+            const res = await productService.createProduct(productData);
+            const newProduct = normalizeProductWeight(res.data);
+            setMasterProducts(prev => [newProduct, ...prev]);
+            toast.success(`"${newProduct.name}" added to Master Catalog`, {
+                style: { borderRadius: '15px', padding: '16px', background: '#fff', color: '#0f172a' }
+            });
+            return newProduct;
+        } catch (error) {
+            console.error("Failed to create product:", error);
+            toast.error("Failed to add product to Master Catalog");
+        }
+    };
+
+    const autoSaveNewProducts = async () => {
+        const newProductsToCreate = [];
+        
+        for (const item of invoice.items) {
+            const name = item.productName?.trim();
+            if (!name) continue;
+            
+            // Check if it already exists in masterProducts (case-insensitive)
+            const exists = masterProducts.some(p => p.name.toLowerCase() === name.toLowerCase());
+            if (!exists) {
+                newProductsToCreate.push({
+                    name,
+                    price: Number(item.unitPrice) || 0,
+                    mrp: Number(item.mrp) || 0,
+                    packetWeight: item.packetWeight || '',
+                    brand: item.brand || '',
+                    description: item.description || ''
+                });
+            }
+        }
+
+        if (newProductsToCreate.length === 0) return;
+
+        // Create them all
+        const createdProducts = [];
+        for (const prod of newProductsToCreate) {
+            try {
+                const res = await productService.createProduct(prod);
+                createdProducts.push(normalizeProductWeight(res.data));
+            } catch (error) {
+                console.error(`Failed to auto-save product ${prod.name}:`, error);
+            }
+        }
+
+        if (createdProducts.length > 0) {
+            setMasterProducts(prev => [...createdProducts, ...prev]);
+            toast.success(`Added ${createdProducts.length} new product(s) to Master Catalog`, {
+                style: { borderRadius: '15px', padding: '16px', background: '#fff', color: '#0f172a' }
+            });
+        }
     };
 
     const handlePlaceOrder = async () => {
@@ -212,7 +290,7 @@ const InvoiceGenerator = () => {
         }
     };
 
-    const handleDownloadPDF = () => {
+    const handleDownloadPDF = async () => {
         const { isValid, errors } = validateInvoice(invoice);
         
         if (!isValid) {
@@ -222,6 +300,9 @@ const InvoiceGenerator = () => {
             });
             return;
         }
+
+        // Auto-save new products in the background
+        await autoSaveNewProducts();
 
         const filename = invoice.invoiceNumber && invoice.invoiceNumber !== 'AUTO-GENERATING...'
             ? invoice.invoiceNumber
@@ -278,7 +359,7 @@ const InvoiceGenerator = () => {
                                  Customer Details
                              </span>
                              <div className="h-px flex-1 bg-white/25" />
-                        </div>
+                         </div>
 
                         <div className="space-y-4 rounded-[32px] border border-white/35 bg-[rgba(255,251,251,0.9)] p-8 shadow-[0_28px_70px_-40px_rgba(27,2,7,0.9)] backdrop-blur-2xl">
                             <input 
@@ -354,6 +435,7 @@ const InvoiceGenerator = () => {
                             onAdd={handleAddItem} 
                             onRemove={handleRemoveItem} 
                             disabled={orderPlaced}
+                            onCreateProduct={handleCreateMasterProduct}
                         />
 
                         {/* Centered Summary and Actions */}
@@ -408,7 +490,10 @@ const InvoiceGenerator = () => {
                                          {downloadActionLabel}
                                      </button>
                                      <button 
-                                         onClick={() => window.location.reload()}
+                                         onClick={() => {
+                                             localStorage.removeItem('pending_invoice');
+                                             window.location.reload();
+                                         }}
                                          className="btn rounded-2xl border border-white/35 bg-white/85 px-10 py-5 font-bold text-slate-700 shadow-[0_18px_36px_-28px_rgba(24,2,6,0.9)] transition-all hover:bg-white hover:scale-105"
                                      >
                                          {resetActionLabel}
