@@ -357,7 +357,7 @@ const InvoicePreview = ({ invoice }) => {
                                         <th className="inv-th-qty">QTY</th>
                                         <th className="inv-th-mrp">MRP</th>
                                         <th className="inv-th-rate">RATE</th>
-                                        <th className="inv-th-amount">AMOUNT</th>
+                                        <th className="inv-th-amount">AMOUNT<br/>(WITHOUT GST)</th>
                                     </tr>
                                 </thead>
                                 <tbody>

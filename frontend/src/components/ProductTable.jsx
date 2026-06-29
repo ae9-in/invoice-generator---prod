@@ -88,7 +88,7 @@ const ProductTable = ({ items, masterProducts = [], gstRate = 0, onUpdate, onAdd
                             <th className="px-4 py-5 w-[8%] text-center">Qty</th>
                             <th className="px-4 py-5 w-[12%] text-center">MRP</th>
                             <th className="px-4 py-5 w-[12%] text-center">Rate</th>
-                            <th className="px-8 py-5 w-[18%] text-right font-black">Total</th>
+                            <th className="px-8 py-5 w-[18%] text-right font-black">Total (Without GST)</th>
                             <th className="px-4 py-5 w-[60px]"></th>
                         </tr>
                     </thead>
@@ -118,7 +118,7 @@ const ProductTable = ({ items, masterProducts = [], gstRate = 0, onUpdate, onAdd
                             </tr>
                         ) : (
                             items.map((item, index) => {
-                            const { lineTotal } = calculateLineTotal(item.quantity, item.unitPrice, gstRate, item.discount || 0);
+                            const { lineTotal } = calculateLineTotal(item.quantity, item.unitPrice, 0, item.discount || 0);
                             return (
                                 <tr key={index} className="group min-h-[5rem] transition-all duration-200 hover:bg-[rgba(255,242,244,0.85)]">
                                     <td className="px-8 py-5 relative" ref={el => pickerRefs.current[index] = el}>

@@ -119,7 +119,7 @@ const InvoiceGenerator = () => {
             const { lineTotal } = calculateLineTotal(
                 item.quantity,
                 item.unitPrice,
-                normalizedTaxRate,
+                0,
                 item.discount
             );
 
@@ -165,7 +165,7 @@ const InvoiceGenerator = () => {
         const { lineTotal } = calculateLineTotal(
             newItems[index].quantity, 
             newItems[index].unitPrice, 
-            invoice.gstRate, 
+            0, 
             newItems[index].discount
         );
         newItems[index].lineTotal = lineTotal;
