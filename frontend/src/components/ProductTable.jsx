@@ -23,7 +23,7 @@ const ProductTable = ({ items, masterProducts = [], gstRate = 0, onUpdate, onAdd
         onUpdate(index, 'multi', {
             productName: product.name,
             unitPrice: product.price,
-            mrp: product.mrp || 0,
+            mrp: product.mrp || product.price || 0,
             brand: product.brand,
             packetWeight: getPacketWeightValue(product)
         });
@@ -83,12 +83,12 @@ const ProductTable = ({ items, masterProducts = [], gstRate = 0, onUpdate, onAdd
                 <table className="w-full text-left border-collapse">
                     <thead>
                         <tr className="border-b border-[#efe2e4] bg-[rgba(255,248,248,0.78)] text-[10px] font-black uppercase tracking-[0.15em] text-[#7e6770] font-outfit">
-                            <th className="px-8 py-5 w-[32%] text-left">Product Name</th>
-                            <th className="px-4 py-5 w-[14%] text-center">Weight</th>
-                            <th className="px-4 py-5 w-[8%] text-center">Qty</th>
-                            <th className="px-4 py-5 w-[12%] text-center">MRP</th>
-                            <th className="px-4 py-5 w-[12%] text-center">Rate</th>
-                            <th className="px-8 py-5 w-[18%] text-right font-black">Total (Without GST)</th>
+                            <th className="px-8 py-5 w-[30%] min-w-[200px] text-left">Product Name</th>
+                            <th className="px-2 py-5 w-[12%] min-w-[90px] text-center">Weight</th>
+                            <th className="px-2 py-5 w-[10%] min-w-[80px] text-center">Qty</th>
+                            <th className="px-2 py-5 w-[12%] min-w-[90px] text-center">MRP</th>
+                            <th className="px-2 py-5 w-[12%] min-w-[90px] text-center">Rate</th>
+                            <th className="px-8 py-5 w-[18%] min-w-[120px] text-right font-black">Total (Without GST)</th>
                             <th className="px-4 py-5 w-[60px]"></th>
                         </tr>
                     </thead>
@@ -212,38 +212,38 @@ const ProductTable = ({ items, masterProducts = [], gstRate = 0, onUpdate, onAdd
                                             </div>
                                         )}
                                     </td>
-                                    <td className="px-4 py-5 text-center">
+                                    <td className="px-2 py-5 text-center">
                                         <input 
                                             type="text" 
                                             placeholder="e.g. 500g"
-                                            className="h-10 w-full rounded-xl border border-[#ebdde0] bg-white/72 px-3 text-center text-xs font-bold text-slate-700 shadow-none focus:border-[#7E0E16] focus:outline-none focus:ring-2 focus:ring-rose-100 disabled:opacity-75"
+                                            className="h-10 w-full min-w-[80px] rounded-xl border border-[#ebdde0] bg-white/72 px-2 text-center text-xs font-bold text-slate-700 shadow-none focus:border-[#7E0E16] focus:outline-none focus:ring-2 focus:ring-rose-100 disabled:opacity-75"
                                             value={item.packetWeight}
                                             disabled={disabled}
                                             onChange={(e) => onUpdate(index, 'packetWeight', e.target.value)}
                                         />
                                     </td>
-                                    <td className="px-4 py-5 text-center">
+                                    <td className="px-2 py-5 text-center">
                                         <input 
                                             type="number" 
-                                            className="h-10 w-full rounded-xl border border-[#ebdde0] bg-white/72 px-3 text-center font-bold text-slate-700 shadow-none focus:border-[#7E0E16] focus:outline-none focus:ring-2 focus:ring-rose-100 disabled:opacity-75"
+                                            className="h-10 w-full min-w-[70px] rounded-xl border border-[#ebdde0] bg-white/72 px-1 text-center font-bold text-slate-700 shadow-none focus:border-[#7E0E16] focus:outline-none focus:ring-2 focus:ring-rose-100 disabled:opacity-75 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                             value={item.quantity}
                                             disabled={disabled}
                                             onChange={(e) => onUpdate(index, 'quantity', e.target.value)}
                                         />
                                     </td>
-                                    <td className="px-4 py-5 text-center">
+                                    <td className="px-2 py-5 text-center">
                                         <input 
                                             type="number" 
-                                            className="h-10 w-full rounded-xl border border-[#ebdde0] bg-white/72 px-3 text-center font-bold text-slate-700 shadow-none focus:border-[#7E0E16] focus:outline-none focus:ring-2 focus:ring-rose-100 disabled:opacity-75"
+                                            className="h-10 w-full min-w-[80px] rounded-xl border border-[#ebdde0] bg-white/72 px-1 text-center font-bold text-slate-700 shadow-none focus:border-[#7E0E16] focus:outline-none focus:ring-2 focus:ring-rose-100 disabled:opacity-75 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                             value={item.mrp}
                                             disabled={disabled}
                                             onChange={(e) => onUpdate(index, 'mrp', e.target.value)}
                                         />
                                     </td>
-                                    <td className="px-4 py-5 text-center">
+                                    <td className="px-2 py-5 text-center">
                                         <input 
                                             type="number" 
-                                            className="h-10 w-full rounded-xl border border-[#ebdde0] bg-white/72 px-3 text-center font-bold text-slate-700 shadow-none focus:border-[#7E0E16] focus:outline-none focus:ring-2 focus:ring-rose-100 disabled:opacity-75"
+                                            className="h-10 w-full min-w-[80px] rounded-xl border border-[#ebdde0] bg-white/72 px-1 text-center font-bold text-slate-700 shadow-none focus:border-[#7E0E16] focus:outline-none focus:ring-2 focus:ring-rose-100 disabled:opacity-75 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                             value={item.unitPrice}
                                             disabled={disabled}
                                             onChange={(e) => onUpdate(index, 'unitPrice', e.target.value)}

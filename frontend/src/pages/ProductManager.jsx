@@ -206,12 +206,12 @@ const ProductManager = () => {
             {/* Modal for Add/Edit */}
             {isModalOpen && (
                 <div className="fixed inset-0 z-[200] flex items-center justify-center bg-[#22050a]/60 p-6 backdrop-blur-md">
-                    <div className="glass w-full max-w-lg overflow-hidden rounded-3xl border border-white/45 shadow-2xl fade-in">
-                        <div className="flex items-center justify-between border-b border-[#ecdfe2] p-8">
+                    <div className="bg-white w-full max-w-lg overflow-hidden rounded-3xl border border-slate-200 shadow-2xl fade-in">
+                        <div className="flex items-center justify-between border-b border-slate-100 p-8 bg-slate-50/50">
                             <h3 className="text-2xl font-black font-outfit text-slate-900">
                                 {editingProduct ? 'Update Master Product' : 'Register New Product'}
                             </h3>
-                            <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-900">
+                            <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-900 bg-white rounded-full p-1 hover:bg-slate-100 transition-colors">
                                 <X size={24} />
                             </button>
                         </div>
@@ -222,7 +222,7 @@ const ProductManager = () => {
                                 <input
                                     type="text"
                                     required
-                                    className="input-field h-12 font-bold text-[#7E0E16]"
+                                    className="input-field h-12 font-bold text-slate-900"
                                     placeholder="e.g. Premium Basmati Rice"
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -235,7 +235,7 @@ const ProductManager = () => {
                                     <input
                                         type="number"
                                         required
-                                        className="input-field h-12 font-black"
+                                        className="input-field h-12 font-black text-slate-900"
                                         placeholder="0.00"
                                         value={formData.price}
                                         onChange={(e) => setFormData({ ...formData, price: e.target.value })}
@@ -246,7 +246,7 @@ const ProductManager = () => {
                                     <input
                                         type="text"
                                         required
-                                        className="input-field h-12 font-black"
+                                        className="input-field h-12 font-black text-slate-900"
                                         placeholder="e.g. 500g, 1L"
                                         value={formData.packetWeight}
                                         onChange={(e) => setFormData({ ...formData, packetWeight: e.target.value })}
@@ -255,21 +255,24 @@ const ProductManager = () => {
                             </div>
 
                             <div>
-                                <label className="label">Select Brand</label>
-                                <select
-                                    className="input-field h-12 font-black appearance-none cursor-pointer"
+                                <label className="label">Brand (Select or Type New)</label>
+                                <input
+                                    list="brands"
+                                    className="input-field h-12 font-black text-slate-900"
                                     required
+                                    placeholder="Choose or type brand..."
                                     value={formData.brand}
                                     onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-                                >
-                                    <option value="" disabled>Choose Brand...</option>
-                                    <option value="JAYA JANARDHANA">JAYA JANARDHANA</option>
-                                    <option value="SRR">SRR</option>
-                                    <option value="MILLETS PRO">MILLETS PRO</option>
-                                </select>
+                                />
+                                <datalist id="brands">
+                                    <option value="AROMA DEW" />
+                                    <option value="JAYA JANARDHANA" />
+                                    <option value="SRR" />
+                                    <option value="MILLETS PRO" />
+                                </datalist>
                             </div>
 
-                            <button type="submit" className="btn w-full bg-[#7E0E16] py-4 text-lg text-white shadow-[0_22px_42px_-24px_rgba(63,4,11,0.9)] hover:bg-[#691018] hover:shadow-[0_26px_46px_-24px_rgba(63,4,11,0.95)]">
+                            <button type="submit" className="btn w-full bg-[#7E0E16] py-4 text-lg text-white shadow-[0_8px_30px_rgb(126,14,22,0.2)] hover:bg-[#691018] hover:shadow-[0_8px_30px_rgb(126,14,22,0.3)] transition-all mt-2">
                                 <Check className="mr-2" />
                                 {editingProduct ? 'Save Master Changes' : 'Add to Catalog'}
                             </button>
