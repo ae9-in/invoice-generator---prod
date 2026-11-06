@@ -16,6 +16,8 @@ export const validatePhone = (phone) => {
 export const validateInvoice = (invoice) => {
     const errors = {};
 
+    if (!invoice.businessName?.trim()) errors.businessName = "Brand / Business name is required";
+    if (!invoice.businessAddress?.trim()) errors.businessAddress = "Brand / Business address is required";
     if (!invoice.customerName?.trim()) errors.customerName = "Customer name is required";
     if (!invoice.customerAddress?.trim()) errors.customerAddress = "Customer address is required";
     if (!invoice.customerPhone?.trim()) {
@@ -57,6 +59,8 @@ export const validateInvoice = (invoice) => {
 
 export const getInvoiceValidationMessage = (errors) => {
     const topLevelMessage = [
+        errors.businessName,
+        errors.businessAddress,
         errors.customerName,
         errors.customerAddress,
         errors.customerPhone,

@@ -13,24 +13,26 @@ import { invoiceService, productService } from '../services/api';
 import { useLocation } from 'react-router-dom';
 import { normalizeProductWeight } from '../utils/productFields';
 
+const DEFAULT_BRAND_ADDRESS = 'BHIVE Platinum, 48, Church St, Haridevpur, Shanthala Nagar, Ashok Nagar, Bengaluru, Karnataka- 560001';
+const DEFAULT_BRAND_PHONE = '9731185960';
+const DEFAULT_BRAND_EMAIL = 'contact@akshara.in';
+
 const InvoiceGenerator = () => {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const typeParam = queryParams.get('type');
+    const brandParam = queryParams.get('brand');
+    const addressParam = queryParams.get('address');
+    const phoneParam = queryParams.get('phone');
+    const emailParam = queryParams.get('email');
     const docType = typeParam === 'quotation' ? 'QUOTATION' : 'INVOICE';
-    const isAromaDew = typeParam === 'aroma_dew';
+    const isAromaDew = typeParam === 'aroma_dew' || brandParam?.toLowerCase().includes('aroma');
     const isQuotation = docType === 'QUOTATION';
-    const docLabel = isAromaDew ? 'Aroma Dew Invoice' : (isQuotation ? 'Quotation' : 'Invoice');
+    const initialBrandName = brandParam || (isAromaDew ? 'Aroma Dew' : 'Akshara Enterprises');
+    const resolvedAddress = addressParam || DEFAULT_BRAND_ADDRESS;
+    const resolvedPhone = phoneParam || DEFAULT_BRAND_PHONE;
+    const resolvedEmail = emailParam || DEFAULT_BRAND_EMAIL;
     const HeadingIcon = isQuotation ? FileCheck : Pencil;
-    const introLabel = isAromaDew ? 'Aroma Dew Workspace' : (isQuotation ? 'Quotation Workspace' : 'Invoice Workspace');
-    const introText = isAromaDew
-        ? 'Prepare a polished Aroma Dew soap invoice with customer details, products, and ready-to-send totals.'
-        : isQuotation
-            ? 'Prepare a polished quotation with pricing, quantities, and share-ready totals.'
-            : 'Prepare a polished invoice with customer details, products, and ready-to-send totals.';
-    const primaryActionLabel = isAromaDew ? 'Generate Aroma Dew Invoice' : (isQuotation ? 'Generate Quotation' : 'Generate Invoice');
-    const downloadActionLabel = isAromaDew ? 'Download Aroma Dew Invoice' : (isQuotation ? 'Download Official Quotation' : 'Download Official Invoice');
-    const resetActionLabel = isAromaDew ? 'Create Another Aroma Dew Invoice' : (isQuotation ? 'Create Another Quotation' : 'Create Another Invoice');
     
     const [isSaving, setIsSaving] = useState(false);
     const [orderPlaced, setOrderPlaced] = useState(false);
@@ -43,19 +45,25 @@ const InvoiceGenerator = () => {
             try {
                 const parsed = JSON.parse(saved);
                 return {
+                    businessAddress: resolvedAddress,
+                    businessPhone: resolvedPhone,
+                    businessEmail: resolvedEmail,
                     ...parsed,
                     docType: docType,
-                    businessName: isAromaDew ? 'Aroma Dew' : 'Akshara Enterprises'
+                    businessName: brandParam || parsed.businessName || initialBrandName,
+                    ...(addressParam ? { businessAddress: addressParam } : {}),
+                    ...(phoneParam ? { businessPhone: phoneParam } : {}),
+                    ...(emailParam ? { businessEmail: emailParam } : {})
                 };
             } catch (e) {
                 console.error("Error parsing saved invoice", e);
             }
         }
         return {
-            businessName: isAromaDew ? 'Aroma Dew' : 'Akshara Enterprises',
-            businessAddress: '123 Enterprise Way, Industrial Park, Bangalore, KA, India',
-            businessEmail: 'contact@akshara.in',
-            businessPhone: '+91 80 4567 8901',
+            businessName: initialBrandName,
+            businessAddress: resolvedAddress,
+            businessEmail: resolvedEmail,
+            businessPhone: resolvedPhone,
             customerName: '',
             customerAddress: '',
             customerEmail: '',
@@ -76,6 +84,19 @@ const InvoiceGenerator = () => {
         };
     });
 
+    const docLabel = invoice?.businessName 
+        ? `${invoice.businessName} ${isQuotation ? 'Quotation' : 'Invoice'}`
+        : (isAromaDew ? 'Aroma Dew Invoice' : (isQuotation ? 'Quotation' : 'Invoice'));
+    const introLabel = invoice?.businessName 
+        ? `${invoice.businessName} Workspace`
+        : (isAromaDew ? 'Aroma Dew Workspace' : (isQuotation ? 'Quotation Workspace' : 'Invoice Workspace'));
+    const introText = isQuotation
+        ? `Prepare a polished ${invoice?.businessName || 'official'} quotation with pricing, quantities, and share-ready totals.`
+        : `Prepare a polished ${invoice?.businessName || 'official'} invoice with customer details, products, and ready-to-send totals.`;
+    const primaryActionLabel = `Generate ${docLabel}`;
+    const downloadActionLabel = `Download Official ${isQuotation ? 'Quotation' : 'Invoice'}`;
+    const resetActionLabel = `Create Another ${isQuotation ? 'Quotation' : 'Invoice'}`;
+
     // Persist invoice state to localStorage
     useEffect(() => {
         localStorage.setItem('pending_invoice', JSON.stringify(invoice));
@@ -83,12 +104,18 @@ const InvoiceGenerator = () => {
 
     // Update docType and businessName when query parameters change
     useEffect(() => {
-        setInvoice(prev => ({
-            ...prev,
-            docType: docType,
-            businessName: isAromaDew ? 'Aroma Dew' : 'Akshara Enterprises'
-        }));
-    }, [docType, isAromaDew]);
+        setInvoice(prev => {
+            const nextBrand = brandParam || (isAromaDew ? 'Aroma Dew' : (prev.businessName || 'Akshara Enterprises'));
+            return {
+                ...prev,
+                docType: docType,
+                businessName: nextBrand,
+                ...(addressParam ? { businessAddress: addressParam } : {}),
+                ...(phoneParam ? { businessPhone: phoneParam } : {}),
+                ...(emailParam ? { businessEmail: emailParam } : {})
+            };
+        });
+    }, [docType, isAromaDew, brandParam, addressParam, phoneParam, emailParam]);
 
     // Load master products on mount
     useEffect(() => {
@@ -304,9 +331,10 @@ const InvoiceGenerator = () => {
         // Auto-save new products in the background
         await autoSaveNewProducts();
 
+        const brandSlug = (invoice.businessName || 'invoice').toLowerCase().replace(/[^a-z0-9]/g, '-');
         const filename = invoice.invoiceNumber && invoice.invoiceNumber !== 'AUTO-GENERATING...'
             ? invoice.invoiceNumber
-            : (isAromaDew ? 'aroma-dew-invoice' : (isQuotation ? 'quotation' : 'invoice'));
+            : `${brandSlug}-${isQuotation ? 'quotation' : 'invoice'}`;
         downloadInvoiceAsPDF('invoice-preview', filename);
     };
 
@@ -353,6 +381,117 @@ const InvoiceGenerator = () => {
                 <div className="grid lg:grid-cols-12 gap-12">
                     {/* Single Column Workspace */}
                     <div className="lg:col-span-12 space-y-12 fade-in stagger-1 opacity-100">
+                        {/* Brand & Company Details */}
+                        <div className="mb-2 flex items-center gap-4">
+                             <div className="h-px flex-1 bg-white/25" />
+                             <span className="rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-[10px] font-black font-outfit uppercase tracking-[0.3em] text-rose-50/80 backdrop-blur-xl">
+                                 Brand & Company Details
+                             </span>
+                             <div className="h-px flex-1 bg-white/25" />
+                        </div>
+
+                        <div className="space-y-5 rounded-[32px] border border-white/35 bg-[rgba(255,251,251,0.9)] p-8 shadow-[0_28px_70px_-40px_rgba(27,2,7,0.9)] backdrop-blur-2xl">
+                            {/* Preset Buttons */}
+                            <div className="flex flex-wrap items-center gap-2 pb-3 border-b border-[#ecdfe2]">
+                                <span className="text-[10px] font-black font-outfit uppercase tracking-widest text-[#9d7e86] mr-2">
+                                    Brand Preset:
+                                </span>
+                                <button
+                                    type="button"
+                                    disabled={orderPlaced}
+                                    onClick={() => handleFieldChange('businessName', 'Akshara Enterprises')}
+                                    className={`px-3.5 py-1.5 rounded-xl text-xs font-black font-outfit uppercase tracking-wider transition-all ${
+                                        invoice.businessName === 'Akshara Enterprises'
+                                            ? 'bg-[#7E0E16] text-white shadow-md'
+                                            : 'border border-[#ecdfe2] bg-white/80 text-slate-700 hover:bg-white'
+                                    }`}
+                                >
+                                    Akshara Enterprises
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={orderPlaced}
+                                    onClick={() => handleFieldChange('businessName', 'Aroma Dew')}
+                                    className={`px-3.5 py-1.5 rounded-xl text-xs font-black font-outfit uppercase tracking-wider transition-all ${
+                                        invoice.businessName === 'Aroma Dew'
+                                            ? 'bg-[#7E0E16] text-white shadow-md'
+                                            : 'border border-[#ecdfe2] bg-white/80 text-slate-700 hover:bg-white'
+                                    }`}
+                                >
+                                    Aroma Dew
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={orderPlaced}
+                                    onClick={() => {
+                                        if (invoice.businessName === 'Akshara Enterprises' || invoice.businessName === 'Aroma Dew') {
+                                            handleFieldChange('businessName', '');
+                                        }
+                                    }}
+                                    className={`px-3.5 py-1.5 rounded-xl text-xs font-black font-outfit uppercase tracking-wider transition-all ${
+                                        invoice.businessName !== 'Akshara Enterprises' && invoice.businessName !== 'Aroma Dew'
+                                            ? 'bg-[#7E0E16] text-white shadow-md'
+                                            : 'border border-dashed border-[#7E0E16]/40 bg-white/80 text-[#7E0E16] hover:bg-white'
+                                    }`}
+                                >
+                                    + Custom Brand
+                                </button>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-black font-outfit uppercase tracking-widest text-[#9d7e86]">
+                                    Brand / Business Name *
+                                </label>
+                                <input 
+                                    type="text"
+                                    placeholder="Enter Brand / Business name (e.g. Akshara Enterprises, Aroma Dew, Pooja Works...)"
+                                    className="h-14 w-full rounded-2xl border border-[#ebdde0] bg-white/72 px-5 text-2xl font-black font-outfit text-[#7E0E16] shadow-none placeholder:text-[#c8aeb4] focus:border-[#7E0E16] focus:outline-none focus:ring-2 focus:ring-rose-100 disabled:opacity-75"
+                                    value={invoice.businessName}
+                                    disabled={orderPlaced}
+                                    onChange={(e) => handleFieldChange('businessName', e.target.value)}
+                                />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-black font-outfit uppercase tracking-widest text-[#9d7e86]">
+                                    Brand / Company Address *
+                                </label>
+                                <textarea 
+                                    placeholder="Enter Brand / Company address..."
+                                    className="h-20 w-full resize-none rounded-2xl border border-[#ebdde0] bg-white/72 px-5 py-3.5 font-bold text-slate-700 shadow-none placeholder:text-[#c8aeb4] focus:border-[#7E0E16] focus:outline-none focus:ring-2 focus:ring-rose-100 disabled:opacity-75 text-sm"
+                                    value={invoice.businessAddress}
+                                    disabled={orderPlaced}
+                                    onChange={(e) => handleFieldChange('businessAddress', e.target.value)}
+                                />
+                            </div>
+
+                            <div className="grid gap-6 border-t border-[#ecdfe2] pt-4 md:grid-cols-2">
+                                <div className="flex items-center gap-4">
+                                     <label className="min-w-[120px] text-[10px] font-black font-outfit uppercase tracking-widest text-[#9d7e86]">Contact Phone</label>
+                                     <input 
+                                         type="text"
+                                         className="flex-1 rounded-xl border border-[#ebdde0] bg-white/72 px-4 py-3 text-xs font-black font-outfit text-slate-900 focus:border-[#7E0E16] focus:outline-none focus:ring-2 focus:ring-rose-100 placeholder:text-[#c8aeb4] disabled:opacity-75"
+                                         placeholder="Enter Contact Phone..."
+                                         value={invoice.businessPhone}
+                                         disabled={orderPlaced}
+                                         onChange={(e) => handleFieldChange('businessPhone', e.target.value)}
+                                     />
+                                </div>
+                                <div className="flex items-center gap-4">
+                                     <label className="min-w-[120px] text-[10px] font-black font-outfit uppercase tracking-widest text-[#9d7e86]">Contact Email</label>
+                                     <input 
+                                         type="email"
+                                         className="flex-1 rounded-xl border border-[#ebdde0] bg-white/72 px-4 py-3 text-xs font-black font-outfit text-slate-900 focus:border-[#7E0E16] focus:outline-none focus:ring-2 focus:ring-rose-100 placeholder:text-[#c8aeb4] disabled:opacity-75"
+                                         placeholder="Enter Contact Email..."
+                                         value={invoice.businessEmail}
+                                         disabled={orderPlaced}
+                                         onChange={(e) => handleFieldChange('businessEmail', e.target.value)}
+                                     />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Customer Details */}
                         <div className="mb-2 flex items-center gap-4">
                              <div className="h-px flex-1 bg-white/25" />
                              <span className="rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-[10px] font-black font-outfit uppercase tracking-[0.3em] text-rose-50/80 backdrop-blur-xl">

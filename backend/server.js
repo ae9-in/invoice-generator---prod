@@ -5,6 +5,7 @@ const connectDB = require('./config/db');
 const invoiceRoutes = require('./routes/invoiceRoutes');
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
+const brandRoutes = require('./routes/brandRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
 // Configure environment variables
@@ -31,6 +32,7 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use('/api/auth', authRoutes);
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/brands', brandRoutes);
 
 // Add health check
 app.get('/api/health', (req, res) => {

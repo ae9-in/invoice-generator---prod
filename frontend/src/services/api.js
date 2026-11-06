@@ -38,4 +38,10 @@ export const invoiceService = {
     deleteInvoice: (id) => axiosInstance.delete(`/invoices/${id}`),
 };
 
+export const brandService = {
+    getBrands: () => axiosInstance.get('/brands'),
+    createBrand: (data) => axiosInstance.post('/brands', data),
+    deleteBrand: (id) => axiosInstance.delete(`/brands/${id}`),
+};
+
 export default axiosInstance;

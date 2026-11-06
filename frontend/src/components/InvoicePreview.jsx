@@ -295,17 +295,35 @@ const InvoicePreview = ({ invoice }) => {
                     {/* ROW 1: Header — Company Name + Address */}
                     <tr>
                         <td className="inv-header-left" colSpan="1">
-                            {invoice.businessName === 'Aroma Dew' ? (
-                                <h1>AROMA DEW</h1>
-                            ) : (
-                                <h1>AKSHARA<br/>ENTERPRISES</h1>
-                            )}
+                            <h1 style={{
+                                fontSize: (invoice.businessName || '').length > 22 ? '22px' : '28px',
+                                wordBreak: 'break-word',
+                                textTransform: 'uppercase'
+                            }}>
+                                {invoice.businessName === 'Akshara Enterprises' ? (
+                                    <>AKSHARA<br />ENTERPRISES</>
+                                ) : (
+                                    invoice.businessName || 'AKSHARA ENTERPRISES'
+                                )}
+                            </h1>
                         </td>
                         <td className="inv-header-right" colSpan="1">
-                            <p>BHIVE Platinum</p>
-                            <p>48, Church St, Haridevpur, Shanthala Nagar,</p>
-                            <p>Ashok Nagar, Bengaluru, Karnataka- 560001</p>
-                            <p style={{ marginTop: '6px' }}>Contact: 9731185960</p>
+                            {invoice.businessAddress ? (
+                                invoice.businessAddress.includes('\n') ? (
+                                    invoice.businessAddress.split('\n').map((line, idx) => (
+                                        <p key={idx}>{line.trim()}</p>
+                                    ))
+                                ) : (
+                                    <p>{invoice.businessAddress}</p>
+                                )
+                            ) : (
+                                <>
+                                    <p>BHIVE Platinum</p>
+                                    <p>48, Church St, Haridevpur, Shanthala Nagar,</p>
+                                    <p>Ashok Nagar, Bengaluru, Karnataka- 560001</p>
+                                </>
+                            )}
+                            <p style={{ marginTop: '6px' }}>Contact: {invoice.businessPhone || '9731185960'}</p>
                         </td>
                     </tr>
 

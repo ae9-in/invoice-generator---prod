@@ -30,7 +30,14 @@ const InvoiceList = ({ invoices, onDelete, onPrint, onDownload, onUpdateStatus }
                                         <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 font-bold font-outfit text-xs group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
                                             {invoice.invoiceNumber.split('-')[1]}
                                         </div>
-                                        <span className="font-black text-slate-900 font-outfit tracking-tight">{invoice.invoiceNumber}</span>
+                                        <div>
+                                            <span className="font-black text-slate-900 font-outfit tracking-tight block">{invoice.invoiceNumber}</span>
+                                            {invoice.businessName && (
+                                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                                                    {invoice.businessName}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                 </td>
                                 <td className="px-6 py-5">
